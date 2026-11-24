@@ -144,7 +144,7 @@ class MainActivity : Activity() {
             }
             addView(rg)
             // 使用者要求的備註
-            hint("・Shizuku 模式：免無障礙，手機鎖著、熄屏也能執行（開機後要先讓 Shizuku 啟動）。\n・無障礙模式：要在螢幕解鎖、亮著時才能跑（它得看著設定頁自動操作）。")
+            hint("・Shizuku 模式：免無障礙，手機鎖著、熄屏也能執行。建議裝 Shizuku-Next（Shizuku 的強化分支），開「開機自動啟動」後重開機會自動啟動並保活，不用再手動開。\n・無障礙模式：要在螢幕解鎖、亮著時才能跑（它得看著設定頁自動操作）。")
             txt("本機機型：${Build.MANUFACTURER} ${Build.MODEL}" + if (TimelineFlow.mi()) "（小米 HyperOS，寬度輸入會自動處理）" else "", 12.5f, color = tSub)
         }
 
@@ -204,7 +204,7 @@ class MainActivity : Activity() {
             if (on && !Prefs.bool(TimelineFlow.K_TESTED)) { toast("請先成功執行一次"); render() }
             else Prefs.put(TimelineFlow.K_AUTO, on)
         }
-        if (shz) hint("Shizuku 模式：開機後 Shizuku 啟動（可在 Shizuku 設定開機自動啟動）才會執行，不需解鎖。")
+        if (shz) hint("Shizuku 模式：開機後 Shizuku 已啟動才會執行，不需解鎖。建議用 Shizuku-Next 並開「開機自動啟動」，重開機後會自動啟動保活。")
         else hint("無障礙模式：開機解鎖後才會執行；搭配下方「開機保活」較穩。")
         val daily = toggle("每日自動執行", TimelineFlow.K_DAILY) { }
         val m0 = Prefs.int(TimelineFlow.K_DAILY_MIN, TimelineFlow.DAILY_DEFAULT)
@@ -252,12 +252,13 @@ class MainActivity : Activity() {
         val v = runCatching { packageManager.getPackageInfo(packageName, 0).versionName }.getOrNull() ?: "?"
         txt("時間軸助手 v$v", bold = true)
         hint("免 root。Shizuku 模式用 adb shell 權限直接下指令；無障礙模式自動操作設定頁。只操作系統設定頁，不讀取也不上傳個人內容。")
+        hint("建議搭配 Shizuku-Next（開機自動啟動、保活）：github.com/rushiranpise/Shizuku-Next")
         hint("© 2026 steve19860004｜授權 GPLv3（本程式不提供任何擔保）")
     }
 
     // ---------- 動作 ----------
     private fun requestShizuku() {
-        if (!Shell.running()) { showText("Shizuku 未啟動", "請先安裝並開啟 Shizuku App，用無線偵錯啟動服務後再回來授權。"); return }
+        if (!Shell.running()) { showText("Shizuku 未啟動", "請先安裝並啟動 Shizuku 服務後再回來授權。\n\n建議裝「Shizuku-Next」（Shizuku 的強化分支，相容本 App）：用無線偵錯啟動一次、開「開機自動啟動」後，重開機會自動啟動，被系統關掉也會自動重啟。\n注意：它與官方 Shizuku 簽章不同，已裝官方版要先解除安裝。"); return }
         Shell.request { granted -> App.ui { toast(if (granted) "Shizuku 已授權" else "未授權"); render() } }
     }
     private fun grantViaShizuku() {
