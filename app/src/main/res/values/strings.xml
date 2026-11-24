@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">時間軸助手</string>
+    <string name="a11y_desc">在設定頁自動操作以開啟 Google 地圖時間軸（調整最小寬度、強制停止、還原），只操作系統設定頁，不讀取也不上傳任何個人內容。</string>
+</resources>

@@ -1,0 +1,49 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Accept SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - name: Build release APK
+        run: gradle :app:assembleRelease --stacktrace
+
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp app/build/outputs/apk/release/app-release.apk out/TimelineHelper-build${{ github.run_number }}.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TimelineHelper-build${{ github.run_number }}
+          path: out/*.apk
+
+      # 放到 Releases，手機可以直接點連結下載安裝
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: 第 ${{ github.run_number }} 版自動編譯
+          body: 由 GitHub Actions 自動編譯，直接下載 APK 安裝即可（固定簽章，可覆蓋更新）。
+          files: out/*.apk
+          make_latest: true
