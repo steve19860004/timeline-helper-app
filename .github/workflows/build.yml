@@ -33,6 +33,7 @@ jobs:
         run: |
           mkdir -p out
           cp app/build/outputs/apk/release/app-release.apk out/TimelineHelper-build${{ github.run_number }}.apk
+          cp app/build/outputs/apk/release/app-release.apk out/TimelineHelper.apk
 
       - uses: actions/upload-artifact@v4
         with:
