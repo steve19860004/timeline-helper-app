@@ -14,14 +14,23 @@ android {
         ndk { abiFilters += listOf("arm64-v8a") }
     }
     signingConfigs {
-        create("fixed") {
-            storeFile = file("timeline.keystore")
-            storePassword = "timeline123"; keyAlias = "timeline"; keyPassword = "timeline123"
+        create("release") {
+            val kf = System.getenv("SIGNING_KEYSTORE_FILE")
+            if (kf != null && file(kf).exists()) {
+                storeFile = file(kf)
+                storePassword = System.getenv("SIGNING_STORE_PASSWORD")
+                keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+                keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+            }
         }
     }
     buildTypes {
-        release { isMinifyEnabled = false; signingConfig = signingConfigs.getByName("fixed") }
-        debug { signingConfig = signingConfigs.getByName("fixed") }
+        release {
+            isMinifyEnabled = false
+            signingConfig = if (System.getenv("SIGNING_KEYSTORE_FILE") != null)
+                signingConfigs.getByName("release") else signingConfigs.getByName("debug")
+        }
+        debug { signingConfig = signingConfigs.getByName("debug") }
     }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }

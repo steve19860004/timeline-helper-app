@@ -26,7 +26,21 @@ jobs:
       - name: Accept SDK licenses
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
+      - name: Prepare signing key
+        env:
+          KS_B64: ${{ secrets.SIGNING_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$KS_B64" ]; then
+            echo "::error::缺少簽署金鑰 Secret（SIGNING_KEYSTORE_B64）。請先到 repo 的 Settings → Secrets and variables → Actions 設定四個 Secret 後再重跑。"
+            exit 1
+          fi
+          echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/release.keystore"
       - name: Build release APK
+        env:
+          SIGNING_KEYSTORE_FILE: ${{ runner.temp }}/release.keystore
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: gradle :app:assembleRelease --stacktrace
 
       - name: Rename APK
